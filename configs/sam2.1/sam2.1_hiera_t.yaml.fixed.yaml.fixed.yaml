@@ -1,0 +1,123 @@
+model:
+  _target_: sam2.sam2.modeling.sam2_base.SAM2Base
+  add_tpos_enc_to_obj_ptrs: true
+  compile_image_encoder: false
+  directly_add_no_mem_embed: true
+  fixed_no_obj_ptr: true
+  image_encoder:
+    _target_: sam2.sam2.modeling.backbones.image_encoder.ImageEncoder
+    neck:
+      _target_: sam2.sam2.modeling.backbones.image_encoder.FpnNeck
+      backbone_channel_list:
+      - 768
+      - 384
+      - 192
+      - 96
+      d_model: 256
+      fpn_interp_model: nearest
+      fpn_top_down_levels:
+      - 2
+      - 3
+      position_encoding:
+        _target_: sam2.sam2.modeling.position_encoding.PositionEmbeddingSine
+        normalize: true
+        num_pos_feats: 256
+        scale: null
+        temperature: 10000
+    scalp: 1
+    trunk:
+      _target_: sam2.sam2.modeling.backbones.hieradet.Hiera
+      embed_dim: 96
+      global_att_blocks:
+      - 5
+      - 7
+      - 9
+      num_heads: 1
+      stages:
+      - 1
+      - 2
+      - 7
+      - 2
+      window_pos_embed_bkg_spatial_size:
+      - 7
+      - 7
+  image_size: 1024
+  iou_prediction_use_sigmoid: true
+  memory_attention:
+    _target_: sam2.sam2.modeling.memory_attention.MemoryAttention
+    d_model: 256
+    layer:
+      _target_: sam2.sam2.modeling.memory_attention.MemoryAttentionLayer
+      activation: relu
+      cross_attention:
+        _target_: sam2.sam2.modeling.sam.transformer.RoPEAttention
+        downsample_rate: 1
+        dropout: 0.1
+        embedding_dim: 256
+        feat_sizes:
+        - 64
+        - 64
+        kv_in_dim: 64
+        num_heads: 1
+        rope_k_repeat: true
+        rope_theta: 10000.0
+      d_model: 256
+      dim_feedforward: 2048
+      dropout: 0.1
+      pos_enc_at_attn: false
+      pos_enc_at_cross_attn_keys: true
+      pos_enc_at_cross_attn_queries: false
+      self_attention:
+        _target_: sam2.sam2.modeling.sam.transformer.RoPEAttention
+        downsample_rate: 1
+        dropout: 0.1
+        embedding_dim: 256
+        feat_sizes:
+        - 64
+        - 64
+        num_heads: 1
+        rope_theta: 10000.0
+    num_layers: 4
+    pos_enc_at_input: true
+  memory_encoder:
+    _target_: sam2.sam2.modeling.memory_encoder.MemoryEncoder
+    fuser:
+      _target_: sam2.sam2.modeling.memory_encoder.Fuser
+      layer:
+        _target_: sam2.sam2.modeling.memory_encoder.CXBlock
+        dim: 256
+        kernel_size: 7
+        layer_scale_init_value: 1e-6
+        padding: 3
+        use_dwconv: true
+      num_layers: 2
+    mask_downsampler:
+      _target_: sam2.sam2.modeling.memory_encoder.MaskDownSampler
+      kernel_size: 3
+      padding: 1
+      stride: 2
+    out_dim: 64
+    position_encoding:
+      _target_: sam2.sam2.modeling.position_encoding.PositionEmbeddingSine
+      normalize: true
+      num_pos_feats: 64
+      scale: null
+      temperature: 10000
+  multimask_max_pt_num: 1
+  multimask_min_pt_num: 0
+  multimask_output_for_tracking: true
+  multimask_output_in_sam: true
+  no_obj_embed_spatial: true
+  num_maskmem: 7
+  only_obj_ptrs_in_the_past_for_eval: true
+  pred_obj_scores: true
+  pred_obj_scores_mlp: true
+  proj_tpos_enc_in_obj_ptrs: true
+  sigmoid_bias_for_mem_enc: -10.0
+  sigmoid_scale_for_mem_enc: 20.0
+  use_high_res_features_in_sam: true
+  use_mask_input_as_output_without_sam: true
+  use_mlp_for_obj_ptr_proj: true
+  use_multimask_token_for_obj_ptr: true
+  use_obj_ptrs_in_encoder: true
+  use_signed_tpos_enc_to_obj_ptrs: true

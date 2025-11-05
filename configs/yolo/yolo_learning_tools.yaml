@@ -1,0 +1,82 @@
+path: /media/voanhnhat/SDD_OUTSIDE1/PROJECT_DETECT_OBJECT/data
+train: data/hybrid_data
+val: data/hybrid_data
+test: data/hybrid_data
+
+nc: 18
+names:
+  0: mobile_phone
+  1: highlight_pen
+  2: handheld_computer
+  3: headphone
+  4: raw
+  5: packback
+  6: comb
+  7: airpod
+  8: pencil
+  9: watch
+  10: pen
+  11: applewatch
+  12: ruler
+  13: laptop
+  14: notebook
+  15: computermouse
+  16: bottle
+  17: wallet
+
+batch: 8
+epochs: 50
+imgsz: 640
+optimizer:
+  _target_: torch.optim.AdamW
+  lr: 0.0001
+  weight_decay: 0.01
+lr0: 0.001
+weight_decay: 0.0005
+augment: True
+
+trainer:
+  logging:
+    log_dir: /media/voanhnhat/SDD_OUTSIDE1/PROJECT_DETECT_OBJECT/output/experiments/logs 
+    log_freq: 100 
+    tensorboard_writer: 
+      should_log: True
+
+  checkpoint:
+    save_dir: /media/voanhnhat/SDD_OUTSIDE1/PROJECT_DETECT_OBJECT/output/experiments/checkpoints
+    save_freq: 1
+
+  model:
+    name: sam2_hiera_b+_hybrid
+    pretrained: true
+    use_amp: true
+    freeze_encoder: true
+    freeze_transformer: true
+    train_decoder_only: true
+    gradient_checkpointing: true
+
+  data:
+    train:
+      path: /media/voanhnhat/SDD_OUTSIDE1/PROJECT_DETECT_OBJECT/data/hybrid_data/hybrid_coco.json
+    val:
+      path: /media/voanhnhat/SDD_OUTSIDE1/PROJECT_DETECT_OBJECT/data/hybrid_data/hybrid_coco.json
+
+  optim:
+    optimizer:
+      _target_: torch.optim.AdamW
+      lr: 1e-4
+      weight_decay: 1e-4
+
+
+  max_epochs: 12
+  val_epoch_freq: 1
+
+  accelerator: cuda
+  seed_value: 123
+
+runtime:
+  cudnn_benchmark: true
+  cudnn_deterministic: false
+  enable_grad_checkpointing: true
+  torch_amp: true
+  empty_cache_every_iter: true
